@@ -1,6 +1,3 @@
-# Advent of Code 2022
+# Advent of Code 🎄
 
-
-A repo for advent for my advent of code solutions.
-
-[Check out advent of code here](https://adventofcode.com/)
+A collection of my Advent of Code solutions.
