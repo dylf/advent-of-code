@@ -1,4 +1,4 @@
 (executables
- (public_names main dayOne22 day01 day02)
- (names main dayOne22 day01 day02)
+ (public_names main dayOne22 day01 day02 day03)
+ (names main dayOne22 day01 day02 day03)
  (libraries aoc core))
