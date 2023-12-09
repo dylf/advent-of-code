@@ -23,13 +23,6 @@ let poker_hand_to_rank hand =
   | OnePair -> 1
   | HighCard -> 0
 
-(*
-   Convert each hand_str to a poker hand
-   Comparator for poker hands
-   Comparator for cards too
-   Sort the list of input
-*)
-
 let parse line =
   match String.lsplit2_exn line ~on:' ' with
   | cards, bid -> (cards, Int.of_string bid)
@@ -53,7 +46,7 @@ let to_card_list hand_str joker_filter place_jokers =
   |> List.sort ~compare:(fun a b -> Int.compare b a)
 
 let filter_jokers l =
-  List.filter l ~f:(fun c -> match c with 'J' -> true | _ -> false)
+  List.filter l ~f:(fun c -> match c with 'J' -> false | _ -> true)
 
 let noop a = a
 
@@ -62,12 +55,13 @@ let place_jokers hand =
   let rec place_jokers_rec jokers acc rem =
     match (jokers, rem) with
     | 0, [] -> acc
-    | 0, hd :: tl -> place_jokers_rec jokers (hd :: acc) tl
-    | d, hd :: tl ->
-        let count = hd + d in
-        let jokers = count mod 5 in
-        place_jokers_rec jokers (count :: acc) tl
-    | _, [] -> -1 :: acc
+    | 0, l -> acc @ l
+    | j, hd :: tl ->
+        let jokers, new_val =
+          if hd + j >= 5 then ((hd + j) mod 5, 5) else (0, hd + j)
+        in
+        place_jokers_rec jokers (new_val :: acc) tl
+    | j, [] -> place_jokers_rec 0 (j :: acc) []
   in
   place_jokers_rec jokers [] hand
 
@@ -89,13 +83,11 @@ let to_poker_hand ?(jokers = false) hand_str =
 let cmp_stronger_hand ?(jokers = false) a b =
   let a = String.to_list a |> List.map ~f:(fun c -> card_to_int ~jokers c) in
   let b = String.to_list b |> List.map ~f:(fun c -> card_to_int ~jokers c) in
-  let rec first_diff a b =
-    match (a, b) with
-    | aHd :: aTl, bHd :: bTl -> (
-        match Int.compare aHd bHd with 0 -> first_diff aTl bTl | d -> d)
-    | _ -> 0
-  in
-  first_diff a b
+  match
+    List.zip_exn a b |> List.find ~f:(fun (a, b) -> not (Int.compare a b = 0))
+  with
+  | Some (a, b) -> Int.compare a b
+  | None -> 0
 
 let cmp_hands ?(jokers = false) a b =
   let aRank = poker_hand_to_rank (to_poker_hand a ~jokers) in
@@ -109,11 +101,6 @@ let solve input jokers =
   |> List.sort ~compare:(fun (a, _) (b, _) -> cmp_hands a b ~jokers)
   |> List.foldi ~init:0 ~f:(fun i acc (_, el) -> ((i + 1) * el) + acc)
 
-(* |> List.map ~f:(fun (c, b) -> printf "Hand: %s Bid: %d\n" c b) *)
-(* |> List.hd_exn *)
-(* 0 *)
-
-(* let () = solve filename true *)
 let () =
   printf "Solution 1: %d\nSolution 2: %d\n" (solve filename false)
     (solve filename true)
