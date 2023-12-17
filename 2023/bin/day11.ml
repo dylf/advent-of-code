@@ -65,24 +65,6 @@ module Space = struct
     | _ -> failwith "No galaxies found"
 end
 
-(* let solve file = *)
-(*   let contents = In_channel.read_all file in *)
-(*   let galaxies = Space.find_galaxies contents in *)
-(*   List.iter galaxies ~f:(fun (x, y) -> printf "%d, %d\n" x y); *)
-(*   let x, y = Space.get_dimensions contents in *)
-(*   printf "%d * %d\n\n" x y; *)
-(*   Space.expanded_rows galaxies (x, y) |> List.iter ~f:(fun d -> printf "%d  " d); *)
-(*   printf "\n\n"; *)
-(*   Space.expanded_cols galaxies (x, y) |> List.iter ~f:(fun d -> printf "%d  " d); *)
-(*   printf "\n\nAfter:\n"; *)
-(*   List.iteri *)
-(*     (Space.find_shortest_paths (Space.find_galaxies_after_expansion contents)) *)
-(*     ~f:(fun i x -> printf "i: %d %d \n" i x); *)
-(*   printf "-----\n"; *)
-(*   List.fold *)
-(*     (Space.find_shortest_paths (Space.find_galaxies_after_expansion contents)) *)
-(*     ~init:0 ~f:( + ) *)
-
 let solve ?(expansion = 2) file =
   In_channel.read_all file
   |> Space.find_galaxies_after_expansion ~expansion
