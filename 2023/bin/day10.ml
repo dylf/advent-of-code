@@ -75,24 +75,75 @@ module Map = struct
   let steps_to_furthest_point start map =
     let steps_in_cycle = find_cycle start map |> List.length in
     (steps_in_cycle / 2) + (steps_in_cycle mod steps_in_cycle / 2)
+
+  let convert_start_to_pipe cycle start =
+    let rec find_connections l =
+      match l with
+      | [ p; _ ] -> p
+      | _ :: tl -> find_connections tl
+      | [] -> failwith "No cycle"
+    in
+    let connections =
+      match cycle with
+      | first :: tl -> (first, find_connections tl)
+      | [] -> failwith "No cycle"
+    in
+    let diff point =
+      match (point, start) with (pX, pY), (sX, sY) -> (sX - pX, sY - pY)
+    in
+    match diff (fst connections) with
+    | -1, 0 -> (
+        match diff (snd connections) with
+        | 1, 0 -> '|'
+        | 0, 1 -> '7'
+        | 0, -1 -> 'F'
+        | _ -> failwith "Bad connection")
+    | 1, 0 -> (
+        match diff (snd connections) with
+        | -1, 0 -> '|'
+        | 0, 1 -> 'J'
+        | 0, -1 -> 'L'
+        | _ -> failwith "Bad connection")
+    | 0, 1 -> (
+        match diff (snd connections) with
+        | 1, 0 -> 'L'
+        | -1, 0 -> 'F'
+        | 0, -1 -> '-'
+        | _ -> failwith "Bad connection")
+    | 0, -1 -> (
+        match diff (snd connections) with
+        | 1, 0 -> 'J'
+        | -1, 0 -> '7'
+        | 0, 1 -> '-'
+        | _ -> failwith "Bad connection")
+    | _ -> failwith "Bad connection"
 end
 
 let solve2 file =
   let contents = In_channel.read_all file in
   let start, map = Map.from_input contents in
   let loop = Map.find_cycle start map in
+  let start_pipe = Map.convert_start_to_pipe loop start in
   String.split_lines contents
   |> List.foldi ~init:0 ~f:(fun x count s ->
-         String.to_list s
-         |> List.foldi ~init:(count, false) ~f:(fun y (count, in_loop) c ->
-                match List.find loop ~f:(fun (a, b) -> a = x && b = y) with
-                | Some _ -> (
-                    match c with
-                    | 'F' | '7' | 'J' | 'L' | '|' | 'S' -> (count, not in_loop)
-                    | _ -> (count, in_loop))
-                | None ->
-                    if in_loop then (count + 1, in_loop) else (count, in_loop))
-         |> fst)
+         let cnt, _, _ =
+           String.to_list s
+           |> List.foldi ~init:(count, false, '_')
+                ~f:(fun y (count, in_loop, last_corner) c ->
+                  let c = match c with 'S' -> start_pipe | c -> c in
+                  match List.find loop ~f:(fun (a, b) -> a = x && b = y) with
+                  | Some _ -> (
+                      match (c, last_corner) with
+                      | 'J', 'F' | '7', 'L' -> (count, in_loop, '_')
+                      | 'F', _ | 'L', _ -> (count, not in_loop, c)
+                      | '7', _ | 'J', _ | '|', _ | 'S', _ ->
+                          (count, not in_loop, '_')
+                      | _ -> (count, in_loop, last_corner))
+                  | None ->
+                      if in_loop then (count + 1, in_loop, last_corner)
+                      else (count, in_loop, last_corner))
+         in
+         cnt)
 
 let solve file =
   let start, map = In_channel.read_all file |> Map.from_input in
