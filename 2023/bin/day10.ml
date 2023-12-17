@@ -91,31 +91,13 @@ module Map = struct
     let diff point =
       match (point, start) with (pX, pY), (sX, sY) -> (sX - pX, sY - pY)
     in
-    match diff (fst connections) with
-    | -1, 0 -> (
-        match diff (snd connections) with
-        | 1, 0 -> '|'
-        | 0, 1 -> '7'
-        | 0, -1 -> 'F'
-        | _ -> failwith "Bad connection")
-    | 1, 0 -> (
-        match diff (snd connections) with
-        | -1, 0 -> '|'
-        | 0, 1 -> 'J'
-        | 0, -1 -> 'L'
-        | _ -> failwith "Bad connection")
-    | 0, 1 -> (
-        match diff (snd connections) with
-        | 1, 0 -> 'L'
-        | -1, 0 -> 'F'
-        | 0, -1 -> '-'
-        | _ -> failwith "Bad connection")
-    | 0, -1 -> (
-        match diff (snd connections) with
-        | 1, 0 -> 'J'
-        | -1, 0 -> '7'
-        | 0, 1 -> '-'
-        | _ -> failwith "Bad connection")
+    match (diff (fst connections), diff (snd connections)) with
+    | (-1, 0), (1, 0) | (1, 0), (-1, 0) -> '|'
+    | (-1, 0), (0, 1) | (0, -1), (-1, 0) -> '7'
+    | (-1, 0), (0, -1) | (0, 1), (-1, 0) -> 'F'
+    | (1, 0), (0, 1) | (0, -1), (1, 0) -> 'J'
+    | (1, 0), (0, -1) | (0, 1), (1, 0) -> 'L'
+    | (0, 1), (0, -1) | (0, -1), (0, 1) -> '-'
     | _ -> failwith "Bad connection"
 end
 
