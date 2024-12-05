@@ -1,45 +1,46 @@
 const std = @import("std");
 
+const day01 = @import("day01.zig");
+const Problems = enum {day01};
+
+const Error = error{
+    MissingArgument,
+    UnknownProblem,
+};
+
 pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
     var args = std.process.args();
     var counter: usize = 0;
-    var problem_name: ?[]const u8 = null;
-    var input_file: ?[]const u8 = null;
+    var arg1: ?[]const u8 = null;
+    var arg2: ?[]const u8 = null;
     while (args.next()) |arg| {
         if (counter == 1) {
-            problem_name = arg;
+            arg1= arg;
         }
         if (counter == 2) {
-            input_file = arg;
+            arg2 = arg;
         }
         counter += 1;
     }
 
-    if (problem_name) |name| {
-        std.debug.print("Problem name: {s}\n", .{name});
+    const problem_name = arg1 orelse {
+        std.log.err("Please supply the problem name as the first argument\n", .{});
+        return Error.MissingArgument;
+    };
+
+    const input_file = arg2 orelse {
+        std.log.err("Please supply the input file as the second argument\n", .{});
+        return Error.MissingArgument;
+    };
+
+
+    const problem = std.meta.stringToEnum(Problems, problem_name) orelse {
+        std.log.err("Unknown problem name: {s}\n", .{problem_name});
+        return Error.UnknownProblem;
+    };
+    switch (problem) {
+        Problems.day01 => {
+            try day01.solve(input_file);
+        }
     }
-
-    if (input_file) |file| {
-        std.debug.print("Input file: {s}\n", .{file});
-    }
-
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
-
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
-
-    try bw.flush(); // don't forget to flush!
-}
-
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
 }
