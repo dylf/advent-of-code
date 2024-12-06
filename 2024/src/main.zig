@@ -2,10 +2,7 @@ const std = @import("std");
 
 const day01 = @import("day01.zig");
 const day02 = @import("day02.zig");
-const Problems = enum {
-    day01,
-    day02
-};
+const Problems = enum { day01, day02 };
 
 const Error = error{
     MissingArgument,
@@ -19,7 +16,7 @@ pub fn main() !void {
     var arg2: ?[]const u8 = null;
     while (args.next()) |arg| {
         if (counter == 1) {
-            arg1= arg;
+            arg1 = arg;
         }
         if (counter == 2) {
             arg2 = arg;
@@ -37,7 +34,6 @@ pub fn main() !void {
         return Error.MissingArgument;
     };
 
-
     const problem = std.meta.stringToEnum(Problems, problem_name) orelse {
         std.log.err("Unknown problem name: {s}\n", .{problem_name});
         return Error.UnknownProblem;
@@ -48,6 +44,6 @@ pub fn main() !void {
         },
         Problems.day02 => {
             try day02.solve(input_file);
-        }
+        },
     }
 }
