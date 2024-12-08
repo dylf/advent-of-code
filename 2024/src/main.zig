@@ -3,7 +3,8 @@ const std = @import("std");
 const day01 = @import("day01.zig");
 const day02 = @import("day02.zig");
 const day03 = @import("day03.zig");
-const Problems = enum { day01, day02, day03 };
+const day04 = @import("day04.zig");
+const Problems = enum { day01, day02, day03, day04 };
 
 const Error = error{
     MissingArgument,
@@ -48,6 +49,9 @@ pub fn main() !void {
         },
         Problems.day03 => {
             try day03.solve(input_file);
+        },
+        Problems.day04 => {
+            try day04.solve(input_file);
         },
     }
 }
